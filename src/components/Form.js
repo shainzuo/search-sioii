@@ -1,4 +1,4 @@
-// src/components/SearchForm.js
+// src/components/Form.js
 import React, { useState } from 'react';
 import axios from 'axios';
 

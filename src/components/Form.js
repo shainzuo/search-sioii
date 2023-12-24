@@ -5,6 +5,7 @@ import axios from 'axios';
 const SearchForm = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResult, setSearchResult] = useState(null);
+  const [error, setError] = useState(null);
 
   const SHEET_BEST_API_ENDPOINT = 'https://sheet.best/api/sheets/e3917dd4-da7e-4ad1-8c27-a38e5ee0eb8a';
 
@@ -14,17 +15,32 @@ const SearchForm = () => {
         `${SHEET_BEST_API_ENDPOINT}?searchTerm=${searchTerm}`
       );
 
-      if (response.data) {
-        setSearchResult(response.data);
+      if (response.data && Array.isArray(response.data)) {
+        const filteredResults = response.data.map((result) => {
+          // Extract actual properties and filter out unnecessary ones
+          const validProperties = Object.keys(result).filter(
+            (key) => key !== '7' && result[key] !== null
+          );
+
+          // Create a new object with valid properties
+          const filteredResult = {};
+          validProperties.forEach((key) => {
+            filteredResult[key] = result[key];
+          });
+
+          return filteredResult;
+        });
+
+        setSearchResult(filteredResults);
       } else {
         // No record found
         setSearchResult(null);
-        window.alert('No record found for the provided search term.');
+        setError('No record found for the provided search term.');
       }
     } catch (error) {
       console.error('Error fetching data:', error);
       setSearchResult(null);
-      window.alert('Error fetching data. Please try again.');
+      setError('Error fetching data. Please try again.');
     }
   };
 
@@ -41,6 +57,8 @@ const SearchForm = () => {
         />
       </label>
       <button onClick={searchData}>Search</button>
+
+      {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {searchResult && (
         <div>

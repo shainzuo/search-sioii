@@ -1,6 +1,7 @@
-// src/components/Form.js
+// src/components/SearchForm.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import './SearchForm.css';
 
 const SearchForm = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,25 +16,25 @@ const SearchForm = () => {
         `${SHEET_BEST_API_ENDPOINT}?searchTerm=${searchTerm}`
       );
 
-      if (response.data && Array.isArray(response.data)) {
-        const filteredResults = response.data.map((result) => {
-          // Extract actual properties and filter out unnecessary ones
-          const validProperties = Object.keys(result).filter(
-            (key) => key !== '7' && result[key] !== null
-          );
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        const filteredResults = response.data
+          .filter((result) => result && Object.keys(result).length > 0)
+          .map((result) => {
+            const validProperties = Object.keys(result).filter(
+              (key) => result[key] !== null
+            );
 
-          // Create a new object with valid properties
-          const filteredResult = {};
-          validProperties.forEach((key) => {
-            filteredResult[key] = result[key];
+            const filteredResult = {};
+            validProperties.forEach((key) => {
+              filteredResult[key] = result[key];
+            });
+
+            return filteredResult;
           });
 
-          return filteredResult;
-        });
-
         setSearchResult(filteredResults);
+        setError(null);
       } else {
-        // No record found
         setSearchResult(null);
         setError('No record found for the provided search term.');
       }
@@ -62,7 +63,6 @@ const SearchForm = () => {
 
       {searchResult && (
         <div>
-          {/* Display search results here */}
           <h3>Search Results:</h3>
           <pre>{JSON.stringify(searchResult, null, 2)}</pre>
         </div>
